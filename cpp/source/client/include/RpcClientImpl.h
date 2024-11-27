@@ -17,6 +17,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 #include "Client.h"
 #include "ClientManager.h"

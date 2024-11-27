@@ -19,11 +19,9 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <cstdint>
 #include <cstdlib>
 #include <exception>
 #include <functional>
-#include <iterator>
 #include <memory>
 #include <string>
 #include <system_error>
@@ -36,16 +34,12 @@
 #include "NamingScheme.h"
 #include "SessionImpl.h"
 #include "Signature.h"
-#include "StdoutHandler.h"
 #include "UtilAll.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "fmt/format.h"
 #include "opencensus/stats/stats.h"
-#include "rocketmq/Logger.h"
-#include "rocketmq/Message.h"
-#include "rocketmq/MessageListener.h"
 #include "spdlog/spdlog.h"
 
 ROCKETMQ_NAMESPACE_BEGIN
@@ -175,15 +169,22 @@ void ClientImpl::start() {
   auto telemetry_functor = [ptr]() {
     std::shared_ptr<ClientImpl> base = ptr.lock();
     if (base) {
-      SPDLOG_INFO("Sync client settings to servers");
+      SPDLOG_DEBUG("Sync client settings to servers");
       base->syncClientSettings();
     }
   };
-  telemetry_handle_ = client_manager_->getScheduler()->schedule(telemetry_functor, TELEMETRY_TASK_NAME,
-                                                                std::chrono::minutes(5), std::chrono::minutes(5));
+
+  telemetry_handle_ = client_manager_->getScheduler()->schedule(
+      telemetry_functor, TELEMETRY_TASK_NAME,
+      std::chrono::minutes(5), std::chrono::minutes(5));
+
+  telemetry_handle_ = client_manager_->getScheduler()->schedule(
+      telemetry_functor, TELEMETRY_TASK_NAME,
+      std::chrono::seconds(3), std::chrono::seconds(3));
 
   auto&& metric_service_endpoint = metricServiceEndpoint();
   if (!metric_service_endpoint.empty()) {
+    return;
     std::weak_ptr<Client> client_weak_ptr(self());
 #ifdef DEBUG_METRIC_EXPORTING
     opencensus::stats::StatsExporter::SetInterval(absl::Seconds(30));
@@ -351,7 +352,7 @@ void ClientImpl::fetchRouteFor(const std::string& topic,
 void ClientImpl::syncClientSettings() {
   absl::MutexLock lk(&session_map_mtx_);
   for (const auto& entry : session_map_) {
-    entry.second->syncSettings();
+    // entry.second->syncSettings();
   }
 }
 
