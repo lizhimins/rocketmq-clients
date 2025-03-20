@@ -189,6 +189,18 @@ void ProducerImpl::wrapSendMessageRequest(const Message& message, SendMessageReq
   SPDLOG_TRACE("SendMessageRequest: {}", request.DebugString());
 }
 
+SendReceipt ProducerImpl::recall(std::string topic, std::string recall_handle, std::error_code& ec) noexcept {
+  ensureRunning(ec);
+  if (ec) {
+    SPDLOG_WARN("Producer is not running");
+    SendReceipt send_receipt{};
+    send_receipt.message_id = std::move(recall_handle);
+    return send_receipt;
+  }
+
+
+}
+
 SendReceipt ProducerImpl::send(MessageConstPtr message, std::error_code& ec) noexcept {
   ensureRunning(ec);
   if (ec) {

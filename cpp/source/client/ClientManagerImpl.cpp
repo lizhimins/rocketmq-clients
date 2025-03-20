@@ -373,6 +373,12 @@ bool ClientManagerImpl::send(const std::string& target_host,
         break;
       }
 
+      case rmq::Code::MESSAGE_BODY_EMPTY: {
+        SPDLOG_ERROR("MessageBodyEmpty: {}. Host={}", status.message(), invocation_context->remote_address);
+        send_result.ec = ErrorCode::MessageBodyTooLarge;
+        break;
+      }
+
       case rmq::Code::TOPIC_NOT_FOUND: {
         SPDLOG_WARN("TopicNotFound: {}. Host={}", status.message(), invocation_context->remote_address);
         send_result.ec = ErrorCode::TopicNotFound;
@@ -1286,6 +1292,16 @@ void ClientManagerImpl::endTransaction(
 
   invocation_context->callback = callback;
   client->asyncEndTransaction(request, invocation_context);
+}
+
+void ClientManagerImpl::recallMessage(const std::string& target_host, const Metadata& metadata,
+                                      const RecallMessageRequest& request, std::chrono::milliseconds timeout,
+                                      const std::function<void(const std::error_code&, const RecallMessageResponse&)>& cb) {
+
+  SPDLOG_INFO("RecallMessage Request: {}", request.DebugString());
+  SPDLOG_DEBUG("RecallMessage Request: {}", request.DebugString());
+
+  
 }
 
 void ClientManagerImpl::forwardMessageToDeadLetterQueue(const std::string& target_host,

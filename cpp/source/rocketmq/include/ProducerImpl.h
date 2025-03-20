@@ -130,6 +130,11 @@ public:
 
   bool endTransaction0(const MiniTransaction& transaction, TransactionState resolution);
 
+  /**
+   * Recall message synchronously, only delay message is supported for now.
+   */
+  SendReceipt recall(std::string topic, std::string recall_handle, std::error_code& ec) noexcept;
+
 protected:
   std::shared_ptr<ClientImpl> self() override {
     return shared_from_this();

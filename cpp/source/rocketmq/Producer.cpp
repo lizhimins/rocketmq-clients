@@ -77,6 +77,7 @@ ProducerBuilder::ProducerBuilder() : impl_(std::make_shared<ProducerImpl>()){};
 ProducerBuilder& ProducerBuilder::withConfiguration(Configuration configuration) {
   auto name_server_resolver = std::make_shared<StaticNameServerResolver>(configuration.endpoints());
   impl_->withNameServerResolver(std::move(name_server_resolver));
+  impl_->withResourceNamespace(configuration.resourceNamespace());
   impl_->withCredentialsProvider(configuration.credentialsProvider());
   impl_->withRequestTimeout(configuration.requestTimeout());
   impl_->withSsl(configuration.withSsl());

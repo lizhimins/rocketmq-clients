@@ -237,6 +237,11 @@ private:
 
   bool trace_{false};
   bool with_ssl_;
+  void recallMessage(const std::string& target_host,
+                     const Metadata& metadata,
+                     const RecallMessageRequest& request,
+                     std::chrono::milliseconds timeout,
+                     const std::function<void(const std::error_code&, const RecallMessageResponse&)>& cb);
 };
 
 ROCKETMQ_NAMESPACE_END
