@@ -325,8 +325,11 @@ bool ClientManagerImpl::send(const std::string& target_host,
           auto first = invocation_context->response.entries().begin();
           send_result.message_id = first->message_id();
           send_result.transaction_id = first->transaction_id();
+          // unique handle to identify a message to recall,
+          // only delay message is supported for now
+          send_result.recall_handle = first->recall_handle();
         } else {
-          SPDLOG_ERROR("Unexpected send-message-response: {}", invocation_context->response.DebugString());
+          SPDLOG_ERROR("Unexpected send-message-response: {}", invocation_context->response.ShortDebugString());
         }
         break;
       }

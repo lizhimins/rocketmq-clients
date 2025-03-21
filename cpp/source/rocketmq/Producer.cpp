@@ -16,7 +16,6 @@
  */
 #include "rocketmq/Producer.h"
 
-#include <chrono>
 #include <memory>
 #include <system_error>
 #include <utility>
@@ -26,6 +25,7 @@
 #include "rocketmq/ErrorCode.h"
 #include "rocketmq/SendReceipt.h"
 #include "rocketmq/Transaction.h"
+#include "rocketmq/RecallReceipt.h"
 
 ROCKETMQ_NAMESPACE_BEGIN
 
@@ -66,6 +66,11 @@ std::unique_ptr<Transaction> Producer::beginTransaction() {
 
 SendReceipt Producer::send(MessageConstPtr message, std::error_code& ec, Transaction& transaction) {
   return impl_->send(std::move(message), ec, transaction);
+}
+
+RecallReceipt Producer::recall(std::string& topic, std::string& recall_handle, std::error_code& ec) noexcept {
+  SPDLOG_INFO("Recall Message, topic={}, handle={}", topic, recall_handle);
+  return impl_->recall(topic, recall_handle, ec);
 }
 
 ProducerBuilder Producer::newBuilder() {

@@ -77,7 +77,6 @@ int main(int argc, char* argv[]) {
   auto producer = Producer::newBuilder()
                       .withConfiguration(Configuration::newBuilder()
                                              .withEndpoints(FLAGS_access_point)
-                                             .withNamespace(FLAGS_resource_namespace)
                                              .withCredentialsProvider(credentials_provider)
                                              .withSsl(FLAGS_tls)
                                              .build())

@@ -22,6 +22,7 @@
 
 #include "Configuration.h"
 #include "Message.h"
+#include "RecallReceipt.h"
 #include "SendCallback.h"
 #include "SendReceipt.h"
 #include "Transaction.h"
@@ -66,6 +67,16 @@ public:
   std::unique_ptr<Transaction> beginTransaction();
 
   SendReceipt send(MessageConstPtr message, std::error_code& ec, Transaction& transaction);
+
+  /**
+   * @brief Recall message asynchronously.
+   *
+   * @param topic
+   * @param recall_handle
+   * @param ec Error code and message
+   * @return SendReceipt Receipt of the pub action if successful, which holds an identifier for the message.
+   */
+  RecallReceipt recall(std::string& topic, std::string& recall_handle, std::error_code& ec) noexcept;
 
 private:
   explicit Producer(std::shared_ptr<ProducerImpl> impl) : impl_(std::move(impl)) {
