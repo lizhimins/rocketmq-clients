@@ -56,4 +56,4 @@ python/__pycache__/
 python/dist
 
 # Environment variables (credentials)
-.env
+.env.qoder/

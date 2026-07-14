@@ -34,17 +34,15 @@ class Producer
 
     public function init()
     {
+        /**
+         * Client ID is currently concatenated using a fixed host name to
+         * facilitate code debugging.
+         */
         $clientId = 'missyourlove' . '@' . posix_getpid() . '@' . rand(0, 10) . '@' . $this->getRandStr(10);
-        $endpoint = getenv('ROCKETMQ_ENDPOINTS') ?: '127.0.0.1:8080';
-        $accessKey = getenv('ROCKETMQ_ACCESS_KEY') ?: '';
-        $secretKey = getenv('ROCKETMQ_SECRET_KEY') ?: '';
-        $client = new MessagingServiceClient($endpoint, [
+        $client = new MessagingServiceClient('rmq-cn-cs02xhf2k01.cn-hangzhou.rmq.aliyuncs.com:8080', [
             'credentials' => ChannelCredentials::createInsecure(),
-            'update_metadata' => function ($metaData) use ($clientId, $accessKey, $secretKey) {
-                if ($accessKey && $secretKey) {
-                    $metaData['authorization'] = $accessKey . ':' . $secretKey;
-                }
-                $metaData['headers'] = ['clientID' => $clientId];
+            'update_metadata' => function ($metaData) use ($clientId) {
+                $metaData['headers'] = ['clientID' => $clientId]; // Pass the ClientID to the server through the header
                 return $metaData;
             }
         ]);
@@ -52,10 +50,10 @@ class Producer
         $qr = new QueryRouteRequest();
         $rs = new Resource();
         $rs->setResourceNamespace('');
-        $rs->setName('NormalTest');
+        $rs->setName('normal_topic');
         $qr->setTopic($rs);
-        $status = $client->QueryRoute($qr)->wait();
-        var_dump($status);
+       $status = $client->QueryRoute($qr)->wait();
+       var_dump($status); // This prints out the response data returned by the server
     }
 
     public function getRandStr($length){
