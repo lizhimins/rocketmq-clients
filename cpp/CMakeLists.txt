@@ -1,32 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
-project(rocketmq)
-set(CMAKE_CXX_STANDARD 17)
+project(rocketmq VERSION 5.1.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(gRPC_DEBUG ON)
-
+include(GNUInstallDirs)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-# Try gRPC from source install (cmake config); fallback to pkg-config shim
-find_package(gRPC CONFIG QUIET)
-if(NOT gRPC_FOUND)
-    include(gRPCPkgConfigShim)
-    set(GRPC_FROM_PKG ON)
-endif()
-
-# Try protobuf from source install (cmake config), fallback to CMake module
-find_package(protobuf CONFIG QUIET)
-if(NOT protobuf_FOUND)
-    find_package(Protobuf QUIET)
-endif()
-
-find_package(absl QUIET)
-if(NOT absl_FOUND)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(ABSL REQUIRED absl)
-endif()
-
-find_package(OpenSSL REQUIRED)
+# Minimum versions aligned with the gRPC 1.46.x dependency chain (gRPC 1.46 bundles protobuf 3.19)
+find_package(protobuf 3.19 CONFIG REQUIRED)
+find_package(gRPC 1.46 CONFIG REQUIRED)
+find_package(absl REQUIRED)
+find_package(OpenSSL 1.1 REQUIRED)
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/proto/apache/rocketmq/v2/definition.proto")
     message(FATAL_ERROR "Proto files not found. Run: git submodule update --init --recursive")
@@ -42,8 +25,6 @@ add_subdirectory(source)
 
 option(BUILD_EXAMPLES "Build example programs or not" ON)
 if (BUILD_EXAMPLES)
-    message("Would build examples")
-    list(APPEND CMAKE_PREFIX_PATH $ENV{HOME}/gflags)
     find_package(gflags REQUIRED)
     find_package(ZLIB REQUIRED)
     add_subdirectory(examples)

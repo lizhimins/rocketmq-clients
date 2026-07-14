@@ -114,7 +114,7 @@ private:
    * TODO: move buffered commands to a shared container, which may survive
    * multiple TelemetryBidiReactor lifecycles.
    */
-  std::list<TelemetryCommand> writes_ ABSL_GUARDED_BY(writes_mtx_);
+  std::list<TelemetryCommand> writes_ GUARDED_BY(writes_mtx_);
   absl::Mutex writes_mtx_;
 
   /**
@@ -127,13 +127,15 @@ private:
    */
   std::string peer_address_;
 
-  StreamState state_ ABSL_GUARDED_BY(state_mtx_);
+  StreamState state_ GUARDED_BY(state_mtx_);
   absl::Mutex state_mtx_;
   absl::CondVar state_cv_;
 
   std::promise<bool> sync_settings_promise_;
   std::atomic<bool> settings_received_{false};
 
+  /// Set to true when close() is called intentionally. Suppresses reconnection in OnDone().
+  std::atomic<bool> intentional_close_{false};
 
   void applySettings(const rmq::Settings& settings);
 
@@ -144,7 +146,7 @@ private:
   void applySubscriptionConfig(const rmq::Settings& settings, std::shared_ptr<Client> client);
 
   /// Attempt to write pending telemetry command to server.
-  void tryWriteNext() ABSL_LOCKS_EXCLUDED(state_mtx_, writes_mtx_);
+  void tryWriteNext() LOCKS_EXCLUDED(state_mtx_, writes_mtx_);
 
   void signalClose();
 };

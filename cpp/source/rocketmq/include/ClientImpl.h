@@ -59,7 +59,7 @@ public:
   virtual void shutdown() noexcept;
 
   void getRouteFor(const std::string& topic, const std::function<void(const std::error_code&, TopicRouteDataPtr)>& cb)
-      ABSL_LOCKS_EXCLUDED(inflight_route_requests_mtx_, topic_route_table_mtx_);
+      LOCKS_EXCLUDED(inflight_route_requests_mtx_, topic_route_table_mtx_);
 
   /**
    * Gather collection of endpoints that are reachable from latest topic route
@@ -67,7 +67,7 @@ public:
    *
    * @param endpoints
    */
-  void endpointsInUse(absl::flat_hash_set<std::string>& endpoints) override ABSL_LOCKS_EXCLUDED(topic_route_table_mtx_);
+  void endpointsInUse(absl::flat_hash_set<std::string>& endpoints) override LOCKS_EXCLUDED(topic_route_table_mtx_);
 
   void heartbeat() override;
 
@@ -75,7 +75,7 @@ public:
     return State::STARTED == state_.load(std::memory_order_relaxed);
   }
 
-  void onRemoteEndpointRemoval(const std::vector<std::string>& hosts) override ABSL_LOCKS_EXCLUDED(isolated_endpoints_mtx_);
+  void onRemoteEndpointRemoval(const std::vector<std::string>& hosts) override LOCKS_EXCLUDED(isolated_endpoints_mtx_);
 
   void schedule(const std::string& task_name, const std::function<void(void)>& task,
                 std::chrono::milliseconds delay) override;
@@ -154,12 +154,12 @@ protected:
   std::atomic<State> state_;
   std::atomic<bool> shutdown_requested_{false};
 
-  absl::flat_hash_map<std::string, TopicRouteDataPtr> topic_route_table_ ABSL_GUARDED_BY(topic_route_table_mtx_);
-  absl::Mutex topic_route_table_mtx_ ABSL_ACQUIRED_AFTER(inflight_route_requests_mtx_); // protects topic_route_table_
+  absl::flat_hash_map<std::string, TopicRouteDataPtr> topic_route_table_ GUARDED_BY(topic_route_table_mtx_);
+  absl::Mutex topic_route_table_mtx_ ACQUIRED_AFTER(inflight_route_requests_mtx_); // protects topic_route_table_
 
   absl::flat_hash_map<std::string, std::vector<std::function<void(const std::error_code&, const TopicRouteDataPtr&)>>>
-      inflight_route_requests_ ABSL_GUARDED_BY(inflight_route_requests_mtx_);
-  absl::Mutex inflight_route_requests_mtx_ ABSL_ACQUIRED_BEFORE(topic_route_table_mtx_); // Protects inflight_route_requests_
+      inflight_route_requests_ GUARDED_BY(inflight_route_requests_mtx_);
+  absl::Mutex inflight_route_requests_mtx_ ACQUIRED_BEFORE(topic_route_table_mtx_); // Protects inflight_route_requests_
 
   static const char* UPDATE_ROUTE_TASK_NAME;
   std::uint32_t route_update_handle_{0};
@@ -167,7 +167,7 @@ protected:
   static const char* TELEMETRY_TASK_NAME;
   std::uint32_t telemetry_handle_{0};
 
-  void syncClientSettings() ABSL_LOCKS_EXCLUDED(session_map_mtx_);
+  void syncClientSettings() LOCKS_EXCLUDED(session_map_mtx_);
 
   // Set Name Server Resolver
   std::shared_ptr<NameServerResolver> name_server_resolver_;
@@ -175,16 +175,16 @@ protected:
   absl::flat_hash_map<std::string, absl::Time> multiplexing_requests_;
   absl::Mutex multiplexing_requests_mtx_;
 
-  absl::flat_hash_set<std::string> isolated_endpoints_ ABSL_GUARDED_BY(isolated_endpoints_mtx_);
+  absl::flat_hash_set<std::string> isolated_endpoints_ GUARDED_BY(isolated_endpoints_mtx_);
   absl::Mutex isolated_endpoints_mtx_;
 
-  absl::flat_hash_map<std::string, std::unique_ptr<Session>> session_map_ ABSL_GUARDED_BY(session_map_mtx_);
+  absl::flat_hash_map<std::string, std::unique_ptr<Session>> session_map_ GUARDED_BY(session_map_mtx_);
   absl::Mutex session_map_mtx_;
 
   virtual void topicsOfInterest(std::vector<std::string> &topics) {
   }
 
-  void updateRouteInfo() ABSL_LOCKS_EXCLUDED(topic_route_table_mtx_);
+  void updateRouteInfo() LOCKS_EXCLUDED(topic_route_table_mtx_);
 
   /**
    * Sub-class is supposed to inherit from std::enable_shared_from_this.
@@ -236,7 +236,7 @@ private:
    * @param route
    */
   void onTopicRouteReady(const std::string& topic, const std::error_code& ec, const TopicRouteDataPtr& route)
-      ABSL_LOCKS_EXCLUDED(inflight_route_requests_mtx_);
+      LOCKS_EXCLUDED(inflight_route_requests_mtx_);
 
   /**
    * Update local cache for the topic. Note, route differences are logged in
@@ -246,7 +246,7 @@ private:
    * @param route
    */
   void updateRouteCache(const std::string& topic, const std::error_code& ec, const TopicRouteDataPtr& route)
-      ABSL_LOCKS_EXCLUDED(topic_route_table_mtx_);
+      LOCKS_EXCLUDED(topic_route_table_mtx_);
 
   void doVerify(std::string target, std::string command_id, MessageConstPtr message);
 

@@ -111,12 +111,8 @@ int main(int argc, char* argv[]) {
                          .build();
       std::error_code ec;
       SendReceipt send_receipt = producer.send(std::move(message), ec);
-      if (ec) {
-        std::cerr << "Failed to publish FIFO message to " << FLAGS_topic << ". Cause: " << ec.message() << std::endl;
-      } else {
-        std::cout << "Publish FIFO message OK. Message-ID: " << send_receipt.message_id << std::endl;
-        count++;
-      }
+      // std::cout << "Message-ID: " << send_receipt.message_id << std::endl;
+      count++;
     }
   } catch (...) {
     std::cerr << "Ah...No!!!" << std::endl;

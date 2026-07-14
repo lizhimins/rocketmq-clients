@@ -28,9 +28,7 @@ std::string TlsHelper::sign(const std::string& access_secret, const std::string&
   HMAC_CTX* ctx = HMAC_CTX_new();
   HMAC_Init_ex(ctx, access_secret.c_str(), access_secret.length(), EVP_sha1(), nullptr);
   HMAC_Update(ctx, reinterpret_cast<const unsigned char*>(content.c_str()), content.length());
-  /* HMAC-SHA1 always produces a 20-byte digest */
-  constexpr unsigned int kSha1DigestSize = 20;
-  auto result = new unsigned char[kSha1DigestSize];
+  auto result = new unsigned char[EVP_MD_size(EVP_sha1())];
   unsigned int len;
   HMAC_Final(ctx, result, &len);
   HMAC_CTX_free(ctx);
