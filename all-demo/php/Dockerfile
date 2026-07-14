@@ -41,7 +41,7 @@ RUN GRPC_VER="v1.80.0" && mkdir -p /app/php/vendor/grpc/Grpc && \
 # 拷贝示例并将 vendor 依赖一起放入
 RUN cp -r /app/php/vendor /app/examples/vendor
 
-COPY docker/run-php-test.sh /app/
+COPY all-demo/php/run-test.sh /app/
 
 ENV ROCKETMQ_ENDPOINT="127.0.0.1:8080"
 ENV ROCKETMQ_ACCESS_KEY=""

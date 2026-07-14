@@ -22,7 +22,7 @@ RUN cd python && pip install --no-cache-dir .
 
 # 拷贝 all-demo 示例
 COPY all-demo/python/example/ /app/examples/
-COPY docker/run-python-test.sh /app/
+COPY all-demo/python/run-test.sh /app/
 
 ENV ROCKETMQ_ENDPOINT="127.0.0.1:8080"
 ENV ROCKETMQ_ACCESS_KEY=""

@@ -22,7 +22,7 @@ FROM mcr.microsoft.com/dotnet/runtime:8.0
 
 WORKDIR /app
 COPY --from=builder /app/bin/ ./bin/
-COPY docker/run-csharp-test.sh /app/
+COPY all-demo/csharp/run-test.sh /app/
 
 ENV ROCKETMQ_ENDPOINT="127.0.0.1:8080"
 ENV ROCKETMQ_ACCESS_KEY=""

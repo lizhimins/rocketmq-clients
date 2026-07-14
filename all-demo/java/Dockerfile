@@ -43,7 +43,7 @@ FROM eclipse-temurin:11-jre
 WORKDIR /app
 COPY --from=builder /app/lib /app/lib
 COPY --from=builder /app/classes /app/classes
-COPY docker/run-java-test.sh /app/
+COPY all-demo/java/run-test.sh /app/
 
 ENV ROCKETMQ_ENDPOINT=""
 ENV ROCKETMQ_ACCESS_KEY=""

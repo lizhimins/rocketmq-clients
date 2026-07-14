@@ -25,7 +25,7 @@ services:
   java:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.java
+      dockerfile: all-demo/java/Dockerfile
     env_file: .env
     environment:
       <<: *common-env
@@ -35,7 +35,7 @@ services:
   golang:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.golang
+      dockerfile: all-demo/golang/Dockerfile
     env_file: .env
     environment:
       <<: *common-env
@@ -45,7 +45,7 @@ services:
   rust:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.rust
+      dockerfile: all-demo/rust/Dockerfile
     env_file: .env
     environment:
       <<: *common-env
@@ -55,7 +55,7 @@ services:
   python:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.python
+      dockerfile: all-demo/python/Dockerfile
     env_file: .env
     environment:
       <<: *common-env
@@ -65,7 +65,7 @@ services:
   nodejs:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.nodejs
+      dockerfile: all-demo/nodejs/Dockerfile
     env_file: .env
     environment:
       <<: *common-env
@@ -75,7 +75,7 @@ services:
   csharp:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.csharp
+      dockerfile: all-demo/csharp/Dockerfile
     env_file: .env
     environment:
       <<: *common-env
@@ -85,7 +85,7 @@ services:
   cpp:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.cpp
+      dockerfile: all-demo/cpp/Dockerfile
     env_file: .env
     environment:
       <<: *common-env
@@ -95,7 +95,7 @@ services:
   php:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.php
+      dockerfile: all-demo/php/Dockerfile
     env_file: .env
     environment:
       <<: *common-env

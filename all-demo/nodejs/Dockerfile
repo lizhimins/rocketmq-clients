@@ -29,7 +29,7 @@ WORKDIR /app
 COPY --from=builder /build/nodejs/ ./nodejs/
 # Copy examples into nodejs/examples/ so relative imports (../src) resolve correctly
 COPY all-demo/nodejs/examples/ ./nodejs/examples/
-COPY docker/run-nodejs-test.sh /app/
+COPY all-demo/nodejs/run-test.sh /app/
 
 ENV ROCKETMQ_NODEJS_CLIENT_ENDPOINTS="127.0.0.1:8080"
 ENV ROCKETMQ_ACCESS_KEY=""

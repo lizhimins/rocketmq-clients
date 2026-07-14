@@ -38,7 +38,7 @@ FROM alpine:3.19
 RUN apk --no-cache add ca-certificates tzdata
 
 COPY --from=builder /bin/producer_normal /bin/producer_fifo /bin/producer_delay /bin/producer_transaction /bin/producer_lite /bin/producer_priority /bin/consumer_push /bin/consumer_lite_push /bin/consumer_simple /bin/
-COPY docker/run-go-test.sh /bin/
+COPY all-demo/golang/run-test.sh /bin/
 
 ENV ROCKETMQ_ENDPOINT="127.0.0.1:8080"
 ENV ROCKETMQ_ACCESS_KEY=""

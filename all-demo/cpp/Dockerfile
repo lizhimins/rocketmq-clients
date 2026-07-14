@@ -62,7 +62,7 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libz.so* /usr/lib/x86_64-linux-gnu
 
 # 拷贝所有构建好的示例二进制
 COPY --from=builder /build/cpp/build/examples/ /app/bin/
-COPY docker/run-cpp-test.sh /app/
+COPY all-demo/cpp/run-test.sh /app/
 
 ENV ROCKETMQ_ENDPOINT="127.0.0.1:8080"
 ENV ROCKETMQ_ACCESS_KEY=""

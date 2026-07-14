@@ -39,7 +39,7 @@ COPY --from=builder /build/target/release/examples/delay_producer /bin/
 COPY --from=builder /build/target/release/examples/transaction_producer /bin/
 COPY --from=builder /build/target/release/examples/push_consumer /bin/
 COPY --from=builder /build/target/release/examples/simple_consumer /bin/
-COPY docker/run-rust-test.sh /bin/
+COPY all-demo/rust/run-test.sh /bin/
 
 ENV ROCKETMQ_ENDPOINT="127.0.0.1:8080"
 ENV ROCKETMQ_ACCESS_KEY=""
