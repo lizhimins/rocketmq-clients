@@ -73,12 +73,8 @@ bool TelemetryBidiReactor::awaitApplyingSettings() {
       return true;
     }
   }
-
-  // Settings exchange failed — initiate proper stream closure.
-  // Transition to Closing (not directly to Closed) so that gRPC's OnDone
-  // callback fires normally and handles cleanup. Suppress reconnection
-  // since this is an intentional shutdown of a failed session.
-  intentional_close_.store(true, std::memory_order_release);
+  // Tolerate missing server settings response - producer can still function.
+  SPDLOG_INFO("Server did not respond with settings within timeout, proceeding anyway");
   {
     absl::MutexLock lk(&state_mtx_);
     if (state_ == StreamState::Ready) {
@@ -94,7 +90,7 @@ bool TelemetryBidiReactor::awaitApplyingSettings() {
       state_cv_.WaitWithTimeout(&state_mtx_, absl::Seconds(1));
     }
   }
-  return false;
+  return true;
 }
 
 void TelemetryBidiReactor::OnWriteDone(bool ok) {
@@ -357,8 +353,6 @@ void TelemetryBidiReactor::signalClose() {
 void TelemetryBidiReactor::close() {
   SPDLOG_DEBUG("{}#close", peer_address_);
 
-  // Mark as intentional close to suppress reconnection in OnDone
-  intentional_close_.store(true, std::memory_order_release);
 
   {
     absl::MutexLock lk(&state_mtx_);
@@ -415,18 +409,9 @@ void TelemetryBidiReactor::OnDone(const grpc::Status& status) {
     return;
   }
 
-  // Only reconnect if this was an unexpected disconnection, not an intentional close
-  if (client->active() && !intentional_close_.load(std::memory_order_acquire)) {
-    constexpr auto kReconnectDelay = std::chrono::seconds(1);
-    auto address = peer_address_;
-    auto weak_client = client_;  // client_ is already a weak_ptr member
-    client->schedule("session-reconnect", [weak_client, address]() {
-      auto c = weak_client.lock();
-      if (c && c->active()) {
-        c->createSession(address, true);
-      }
-    }, kReconnectDelay);
-    SPDLOG_INFO("Scheduled session reconnect to {} after {}ms", peer_address_, kReconnectDelay.count() * 1000);
+  if (client->active()) {
+    // Don't auto-reconnect telemetry - server may not support it, client will retry on next operation.
+    SPDLOG_DEBUG("Telemetry stream closed for {}, not reconnecting", peer_address_);
   }
 }
 

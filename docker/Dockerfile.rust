@@ -1,0 +1,50 @@
+# syntax=docker/dockerfile:1
+# ============================================
+# Rust — RocketMQ Client Test
+# ============================================
+FROM rust:1.88-slim AS builder
+
+WORKDIR /build
+
+# 先拷贝 Cargo.toml 利用层缓存
+COPY rust/Cargo.toml rust/Cargo.lock rust/build.rs ./
+RUN mkdir -p src && echo "fn main(){}" > src/main.rs \
+    && cargo fetch || true
+
+# 拷贝全部源码
+COPY rust/ ./
+
+# 用 all-demo 的示例覆盖 (all-demo 示例支持环境变量配置)
+COPY all-demo/rust/examples/ ./examples/
+
+# 编译 examples
+RUN cargo build --release \
+    --example producer \
+    --example fifo_producer \
+    --example delay_producer \
+    --example transaction_producer \
+    --example push_consumer \
+    --example simple_consumer
+
+# ---------- runtime ----------
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /build/target/release/examples/producer /bin/
+COPY --from=builder /build/target/release/examples/fifo_producer /bin/
+COPY --from=builder /build/target/release/examples/delay_producer /bin/
+COPY --from=builder /build/target/release/examples/transaction_producer /bin/
+COPY --from=builder /build/target/release/examples/push_consumer /bin/
+COPY --from=builder /build/target/release/examples/simple_consumer /bin/
+COPY docker/run-rust-test.sh /bin/
+
+ENV ROCKETMQ_ENDPOINT="127.0.0.1:8080"
+ENV ROCKETMQ_ACCESS_KEY=""
+ENV ROCKETMQ_SECRET_KEY=""
+
+RUN chmod +x /bin/run-rust-test.sh
+
+ENTRYPOINT ["/bin/run-rust-test.sh"]

@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1
+# ============================================
+# C# (.NET) — RocketMQ Client Test
+# ============================================
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
+
+WORKDIR /build
+
+# 使用原始 C# 项目 (目录结构已包含正确的 protos 引用)
+COPY csharp/rocketmq-client-csharp/ ./csharp/rocketmq-client-csharp/
+# 使用 all-demo 的示例 (已配置正确的 topic 名称)
+COPY all-demo/csharp/examples/ ./csharp/examples/
+COPY protos/ ./protos/
+
+# 编译原始示例项目
+RUN cd csharp/examples \
+    && dotnet restore \
+    && dotnet publish -c Release -o /app/bin --framework net8.0
+
+# ---------- runtime ----------
+FROM mcr.microsoft.com/dotnet/runtime:8.0
+
+WORKDIR /app
+COPY --from=builder /app/bin/ ./bin/
+COPY docker/run-csharp-test.sh /app/
+
+ENV ROCKETMQ_ENDPOINT="127.0.0.1:8080"
+ENV ROCKETMQ_ACCESS_KEY=""
+ENV ROCKETMQ_SECRET_KEY=""
+
+RUN chmod +x /app/run-csharp-test.sh
+
+ENTRYPOINT ["/app/run-csharp-test.sh"]
